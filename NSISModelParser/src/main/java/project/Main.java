@@ -13,8 +13,8 @@ public class Main {
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        new Main().processModel();
-//        new Main().processData();
+//        new Main().processModel();
+        new Main().processData();
     }
 
     private void processModel() throws IOException {
@@ -35,8 +35,6 @@ public class Main {
 
         long time = System.currentTimeMillis();
 
-        System.out.println("Done parsing, starting to create csv. Took " + (System.currentTimeMillis() - time) / 60000 + "min");
-
         try {
             ExecutorService executorService = Executors.newCachedThreadPool();
 
@@ -45,7 +43,7 @@ public class Main {
 
             int j = 0;
             while (line != null) {
-                Callable<Void> callable = new Parser("C:\\temp\\EN_data\\NTISDATD-PTD-2016-07-06-Day8_S\\", j, line);
+                Callable<Void> callable = new Parser("C:\\temp\\EN_data\\NTISDATD-PTD-2016-07-06-Day8\\", j, line);
                 executorService.submit(callable);
                 line = br.readLine();
                 j++;
