@@ -1,0 +1,21 @@
+LOAD CSV FROM "file:///data0.csv" AS line
+CREATE (d:Data {date:line[0], time:toInteger(line[1]), id:toInteger(line[2]), travelTime:toInteger(line[3]), speed:toInteger(line[4]), expectedTime:toInteger(line[5])})
+//Date,Time,Id,Travel time,Speed,NormallyExpectedTravelTime
+
+LOAD CSV FROM "file:///links.csv" AS line
+CREATE (n:Link {id:toInteger(line[0]), fromNode:toInteger(line[1]), toNode:toInteger(line[2]), roadName:line[3})
+//Id, fromNode, toNode
+
+LOAD CSV FROM "file:///nodes.csv" AS line
+CREATE (n:Node {id:toInteger(line[0]), lat:toFloat(line[1]), lon:toFloat(line[2])})
+//Id, lat, lon
+
+
+MATCH (l:Link)
+MATCH (n1:Node {id:l.fromNode})
+MATCH (n2:Node {id:l.toNode})
+CREATE (n1)-[r:LINK_REL {id:l.id, name:l.roadName}]->(n2)
+
+MATCH (l:Link)
+MATCH (d:Data) where d.id = l.id
+CREATE (d) - [r:DATA_REL] -> (l) 

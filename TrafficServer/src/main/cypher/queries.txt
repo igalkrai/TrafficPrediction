@@ -1,0 +1,5 @@
+MATCH (n1:Node { id: 1310811 }),(n2:Node { id:1310815 }), p = shortestPath((n1)-[*]-(n2))
+RETURN p
+
+MATCH (n1:Node { id: 1310811 }),(n2:Node { id:1310815 }), p = ((n1)-[*..50]-(n2))
+RETURN p limit 100
