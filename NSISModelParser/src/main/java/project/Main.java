@@ -10,28 +10,28 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Main {
-
+    
+    public static final String DATA_FOLDER = "C:\\Temp\\data";
+    
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        new Main().processModel();
-//        new Main().processData();
+        new Main().processModel(DATA_FOLDER + "\\NTISDATD-2017-01-24-Day1\\NTISModel-PredefinedLocations-2017-01-18-v5.15.xml");
+//        new Main().processData("C:\\temp\\EN_data\\NTISDATD-PTD-2016-07-06-Day8.dat");
     }
 
-    private void processModel() throws IOException {
+    private void processModel(String modelFilePath) throws IOException {
 
         NSISXmlParser nsisXmlParser = new NSISXmlParser();
-        nsisXmlParser.readModel("C:\\temp\\EN_data\\NTISModel-PredefinedLocations-2016-06-08-v4.5.xml");
+        nsisXmlParser.readModel(modelFilePath);
         Map<Long, Node> nodeMap = nsisXmlParser.getNodeMap();
         Map<Long, Link> linkMap = nsisXmlParser.getLinkMap();
 
         CsvOutputWriter csvOutputWriter = new CsvOutputWriter();
-        csvOutputWriter.writeNodesToCsv(new ArrayList<>(nodeMap.values()), "C:\\temp\\EN_data\\nodes.csv");
-        csvOutputWriter.writeLinksToCsv(new ArrayList<>(linkMap.values()), "C:\\temp\\EN_data\\links.csv");
+        csvOutputWriter.writeNodesToCsv(new ArrayList<>(nodeMap.values()), DATA_FOLDER + "\\nodes.csv");
+        csvOutputWriter.writeLinksToCsv(new ArrayList<>(linkMap.values()), DATA_FOLDER + "\\links.csv");
     }
 
-    private void processData() throws IOException, InterruptedException {
-
-        String fileName = "C:\\temp\\EN_data\\NTISDATD-PTD-2016-07-06-Day8.dat"; //_wrapped.xml
+    private void processData(String dataFilePath) throws IOException, InterruptedException {
 
         long time = System.currentTimeMillis();
 
@@ -40,7 +40,7 @@ public class Main {
         try {
             ExecutorService executorService = Executors.newCachedThreadPool();
 
-            BufferedReader br = new BufferedReader(new FileReader(fileName));
+            BufferedReader br = new BufferedReader(new FileReader(dataFilePath));
             String line = br.readLine();
 
             int j = 0;
@@ -55,7 +55,7 @@ public class Main {
 
         } catch (Exception e) {
             e.printStackTrace();
-            System.err.println(fileName);
+            System.err.println(dataFilePath);
             System.err.println(e);
         }
 
