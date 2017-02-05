@@ -3,3 +3,7 @@ RETURN p
 
 MATCH (n1:Node { id: 1310811 }),(n2:Node { id:1310815 }), p = ((n1)-[*..50]-(n2))
 RETURN p limit 100
+
+MATCH (d:Data)
+WHERE d.id IN [200084083,200084082,199003403,115024001,199086201,108032801]
+RETURN d.id, d.date,d.expectedTime,d.travelTime,d.speed order by d.id, d.time ASC

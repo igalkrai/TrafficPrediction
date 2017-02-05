@@ -30,9 +30,10 @@ public class Parser implements Callable<Void> {
 
         System.out.println("read line " + startLine + " thread-" + Thread.currentThread().getId());
         List<Data> dataList = nsisXmlParser.readData(is);
-        csvOutputWriter.writeDataToCsv(dataList,
-                outputFolder + "data" + startLine + ".csv");
-
+        if(!dataList.isEmpty()) {
+            csvOutputWriter.writeDataToCsv(dataList, outputFolder + "data" + startLine + ".csv");
+        }
+        
         System.out.println("saved line " + startLine);
 
         return null;

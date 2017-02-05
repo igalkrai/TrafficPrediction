@@ -15,6 +15,10 @@ import java.util.stream.Stream;
 
 import static org.neo4j.helpers.collection.MapUtil.map;
 
+//import org.neo4j.helpers.collection.Iterators;
+
+//import static org.neo4j.helpers.collection.MapUtil.map;
+
 /**
  * Created by Igal Kraisler on 12/01/2017.
  */
@@ -45,6 +49,7 @@ public class TrafficRepository {
             return Collections.emptyMap();
         }
 
+
         return Iterators.singleOrNull(cypher.query(
                 "MATCH (node:Node {id:{id}})" +
                         " RETURN node LIMIT 1",
@@ -65,14 +70,14 @@ public class TrafficRepository {
 
     /**
      * LOAD CSV FROM "file:///nodes.csv" AS line
-     * CREATE (n:Node {id:toInteger(line[0]), lat:toFloat(line[1]), lon:toFloat(line[2])})
+     * CREATE (n:Node {id:toInt(line[0]), lat:toFloat(line[1]), lon:toFloat(line[2])})
      */
     public void loadDataFromCsv(String csvFolder) throws IOException {
 
 //        cypher.query("LOAD CSV FROM \"file:///data//data1.csv\" AS line" +
-//                        " CREATE (d:Data {date:line[0], time:toInteger(line[1]), " +
-//                        "id:toInteger(line[2]), travelTime:toInteger(line[3]), " +
-//                        "speed:toInteger(line[4]), expectedTime:toInteger(line[5])})",
+//                        " CREATE (d:Data {date:line[0], time:toInt(line[1]), " +
+//                        "id:toInt(line[2]), travelTime:toInt(line[3]), " +
+//                        "speed:toInt(line[4]), expectedTime:toInt(line[5])})",
 //                map("file","data1.csv"));
         Path path = Paths.get(csvFolder);
 
@@ -84,9 +89,9 @@ public class TrafficRepository {
                 String fileName = "file:///data/" + file.getFileName();
 //
                 cypher.query("LOAD CSV FROM {file} AS line" +
-                                " CREATE (d:Data {date:line[0], time:toInteger(line[1]), " +
-                                "id:toInteger(line[2]), travelTime:toInteger(line[3]), " +
-                                "speed:toInteger(line[4]), expectedTime:toInteger(line[5])})",
+                                " CREATE (d:Data {date:line[0], time:toInt(line[1]), " +
+                                "id:toInt(line[2]), travelTime:toInt(line[3]), " +
+                                "speed:toInt(line[4]), expectedTime:toInt(line[5])})",
                         map("file", fileName));
 
                 System.out.println("Loaded " + fileName);

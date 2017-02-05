@@ -20,10 +20,14 @@ public class DataHandler extends DefaultHandler {
     private Data currData;
     private Date time;
 
+    //d2lm:basicData xsi:type="d2lm:TravelTimeData"
+    
     private boolean isInD2LogicalModel;
     private boolean isInPayloadPublication;
+    private boolean isInFeedType;
     private boolean isInTimeDefault;
     private boolean isInElaboratedData;
+    private boolean isInBasicData;
     private boolean isInPredefinedLocationReference;
     private boolean isInAverageVehicleSpeed;
     private boolean isInSpeed;
@@ -32,7 +36,8 @@ public class DataHandler extends DefaultHandler {
     private boolean isInNormallyExpectedTravelTime;
 
     private int line = 0;
-
+    private boolean sensorOnlyType = false;
+    
     @Override
     public void startDocument() throws SAXException {
         super.startDocument();
@@ -52,17 +57,24 @@ public class DataHandler extends DefaultHandler {
             isInD2LogicalModel = true;
         } else if (isInD2LogicalModel && (qName.equalsIgnoreCase("d2lm:payloadPublication"))) {
             isInPayloadPublication = true;
+        } else if(isInPayloadPublication && (qName.equalsIgnoreCase("d2lm:feedType"))){
+                isInFeedType = true;
         } else if (isInPayloadPublication && (qName.equalsIgnoreCase("d2lm:timeDefault"))) {
             isInTimeDefault = true;
         } else if (isInPayloadPublication && (qName.equalsIgnoreCase("d2lm:elaboratedData"))) {
             isInElaboratedData = true;
-        } else if (isInElaboratedData && (qName.equalsIgnoreCase("d2lm:predefinedLocationReference"))) {
+        } else if (isInElaboratedData && (qName.equalsIgnoreCase("d2lm:basicData"))){
+            String typeStr = attributes.getValue("xsi:type");
+            if(typeStr.equalsIgnoreCase("d2lm:TravelTimeData")) {
+                isInBasicData = true;
+            }
+        } else if (isInBasicData && (qName.equalsIgnoreCase("d2lm:predefinedLocationReference"))) {
             String idStr = attributes.getValue("id");
             long id = Long.parseLong(idStr);
             if (currData == null || currData.getId() != id) {
 //            System.out.println("id=" + Long.parseLong(id));
 
-                if ((currData != null) && currData.isFull()) {
+                if ((currData != null) && currData.isFull() && sensorOnlyType) {
                     dataList.add(currData);
                 }
 //                System.out.println("size=" + dataList.size() + ", element no=" + line);
@@ -73,13 +85,13 @@ public class DataHandler extends DefaultHandler {
             }
 
             isInPredefinedLocationReference = true;
-        } else if (isInElaboratedData && (qName.equalsIgnoreCase("d2lm:averageVehicleSpeed"))) {
+        } else if (isInBasicData && (qName.equalsIgnoreCase("d2lm:averageVehicleSpeed"))) {
             isInAverageVehicleSpeed = true;
         } else if (isInAverageVehicleSpeed && (qName.equalsIgnoreCase("d2lm:speed"))) {
             isInSpeed = true;
-        } else if (isInElaboratedData && (qName.equalsIgnoreCase("d2lm:travelTime"))) {
+        } else if (isInBasicData && (qName.equalsIgnoreCase("d2lm:travelTime"))) {
             isInTravelTime = true;
-        } else if (isInElaboratedData && (qName.equalsIgnoreCase("d2lm:normallyExpectedTravelTime"))) {
+        } else if (isInBasicData && (qName.equalsIgnoreCase("d2lm:normallyExpectedTravelTime"))) {
             isInNormallyExpectedTravelTime = true;
         } else if ((isInTravelTime || isInNormallyExpectedTravelTime) && (qName.equalsIgnoreCase("d2lm:duration"))) {
             isInDuration = true;
@@ -94,19 +106,23 @@ public class DataHandler extends DefaultHandler {
             isInD2LogicalModel = false;
         } else if (isInD2LogicalModel && (qName.equalsIgnoreCase("d2lm:payloadPublication"))) {
             isInPayloadPublication = false;
-        } else if (isInPayloadPublication && (qName.equalsIgnoreCase("d2lm:timeDefault"))) {
+        } else if(isInPayloadPublication && (qName.equalsIgnoreCase("d2lm:feedType"))) {
+            isInFeedType = false;
+        }else if (isInPayloadPublication && (qName.equalsIgnoreCase("d2lm:timeDefault"))) {
             isInTimeDefault = false;
         } else if (isInPayloadPublication && (qName.equalsIgnoreCase("d2lm:elaboratedData"))) {
             isInElaboratedData = false;
-        } else if (isInElaboratedData && (qName.equalsIgnoreCase("d2lm:predefinedLocationReference"))) {
+        } else if(isInElaboratedData && (qName.equalsIgnoreCase("d2lm:basicData"))){
+            isInBasicData = false;
+        } else if (isInBasicData && (qName.equalsIgnoreCase("d2lm:predefinedLocationReference"))) {
             isInPredefinedLocationReference = false;
-        } else if (isInElaboratedData && (qName.equalsIgnoreCase("d2lm:averageVehicleSpeed"))) {
+        } else if (isInBasicData && (qName.equalsIgnoreCase("d2lm:averageVehicleSpeed"))) {
             isInAverageVehicleSpeed = false;
         } else if (isInAverageVehicleSpeed && (qName.equalsIgnoreCase("d2lm:speed"))) {
             isInSpeed = false;
-        } else if (isInElaboratedData && (qName.equalsIgnoreCase("d2lm:travelTime"))) {
+        } else if (isInBasicData && (qName.equalsIgnoreCase("d2lm:travelTime"))) {
             isInTravelTime = false;
-        } else if (isInElaboratedData && (qName.equalsIgnoreCase("d2lm:normallyExpectedTravelTime"))) {
+        } else if (isInBasicData && (qName.equalsIgnoreCase("d2lm:normallyExpectedTravelTime"))) {
             isInNormallyExpectedTravelTime = false;
         } else if ((isInTravelTime || isInNormallyExpectedTravelTime) && (qName.equalsIgnoreCase("d2lm:duration"))) {
             isInDuration = false;
@@ -117,6 +133,10 @@ public class DataHandler extends DefaultHandler {
     public void characters(char[] ch, int start, int length) throws SAXException {
         super.characters(ch, start, length);
 
+        if(isInFeedType){
+            String feedType = new String(ch, start, length);
+            sensorOnlyType = feedType.equalsIgnoreCase("Fused Sensor-only PTD");
+        }
         if (isInTravelTime && isInDuration) {
             String travelTime = new String(ch, start, length);
             currData.setTravelTime(Float.parseFloat(travelTime));
@@ -138,7 +158,7 @@ public class DataHandler extends DefaultHandler {
             }
         }
     }
-
+    
     public List<Data> getDataList() {
         return dataList;
     }
